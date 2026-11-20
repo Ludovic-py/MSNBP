@@ -1,17 +1,4 @@
-// rust_solver.rs
-// Moteur natif de recherche de reseaux de tri binaires minimaux
-// (Couches BFS + deduplication d'etats sharde + masques de bits u64 / u128 + multi-threading).
-// Version optimisee RAM :
-//   - purge des couches `parents` precedentes des qu'elles ne servent plus
-//   - vidage explicite de `frontier` avant de construire `next_frontier`
-//   - deduplication directe dans les shards sans dupliquer les candidats deja vus
-//
-// Zero dependance externe (bibliotheque standard uniquement, Rust 1.63+).
-// Compilation Windows (PowerShell) :
-//   rustc -O -C target-cpu=native rust_solver.rs -o rust_solver.exe
-//
-// Compilation Linux / macOS :
-//   rustc -O -C target-cpu=native rust_solver.rs -o rust_solver
+
 
 use std::collections::HashSet;
 use std::env;
@@ -214,7 +201,7 @@ fn emit_line(lock: &Mutex<()>, line: &str) {
 }
 
 // ---------------------------------------------------------------------------
-// Sharded Parallel Layer BFS with RAM-conscious Cleanup
+// Sharded Parallel Layer BFS avec nettoyage RAM
 // ---------------------------------------------------------------------------
 
 struct Config {
