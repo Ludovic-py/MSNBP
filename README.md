@@ -16,3 +16,6 @@ Outil de recherche, vérification et simulation visuelle de réseaux de tri / c�
 - **Compilation du moteur Rust (si besoin) :**
   ```powershell
   rustc -O -C target-cpu=native rust_solver.rs -o rust_solver.exe
+
+## OEIS
+- **suite :** https://oeis.org/A003075
