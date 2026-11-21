@@ -22,7 +22,7 @@ Outil de recherche, vérification et simulation visuelle de réseaux de tri / c�
 
 | N | Comparateurs optimaux | Solutions trouvées | Type de masque |
 |---|----------------------|-------------------|----------------|
-| 3 | 3 | — | `u64` |
+| 3 | 3 | 5 | `u64` |
 | 4 | 5 | 5 | `u64` |
 | 5 | 9 | 340 | `u64` |
 | 6 | 12 | 1 725 | `u64` |
