@@ -1,5 +1,5 @@
 # MSNBP — Réseau de tri Binaire de Taille minimale
-*(Minimal Sorting Network with Binary Principle) — Projet MathsEnJeans 2024/2025*
+*(Minimal Sorting Network with Binary Principle)*
 
 Outil de recherche, vérification et simulation visuelle de réseaux de tri / câblages booléens minimaux, avec interface **Tkinter** en français, moteur **masques de bits** et solveur natif **Rust** multi-cœurs.
 
