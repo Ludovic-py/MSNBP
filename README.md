@@ -95,14 +95,16 @@ Si on **supprime** le câble du haut (C₀) ou du bas (N-1) d'un réseau, ainsi 
 
 ## Résultats de recherche
 
-| N | Comparateurs optimaux | Solutions trouvées | Type de masque |
-|---|----------------------|-------------------|----------------|
-| 3 | 3 | — | `u64` |
-| 4 | 5 | — | `u64` |
-| 5 | 9 | 340 | `u64` |
-| 6 | 12 | 1 725 | `u64` |
-| 7 | 16 | **515** (5 familles de préfixes) | `u128` |
-| 8 | 19 | **726** (4 familles de préfixes) | `U256` (2 × u128) |
+| N | Comparateurs optimaux | Solutions trouvées | Exemple de réseau (couches Foata) | Type de masque |
+|---|----------------------|-------------------|----------------------------------|----------------|
+| 3 | 3 | — | `(0,1) (0,2) (1,2)` — 7 séquences (DAG complet) | `u64` |
+| 4 | 5 | — | `(0,2) (1,3) (0,1) (2,3) (1,2)` — 87 séquences (DAG complet) | `u64` |
+| 5 | 9 | 340 | Exemple : `(0,1) (2,3) (0,2) (1,3) (1,2) (3,4) (0,1) (2,3) (1,2)` — 149 040 séquences (DAG complet) | `u64` |
+| 6 | 12 | 1 725 | 12 portes optimales | `u64` |
+| 7 | 16 | **515** (5 familles de préfixes) | 16 portes, profondeur 6-11 | `u128` |
+| 8 | 19 | **726** (4 familles de préfixes) | 19 portes, profondeur 6-9 | `U256` (2 × u128) |
+
+**Note :** pour N=3 et N=4, les solutions optimales sont exhaustivement connues depuis les travaux de Batcher (1968). L'outil les vérifie et les simule, mais la recherche systématique n'a pas été lancée car ces cas sont triviaux. Le DAG complet de N=3 contient 7 chemins optimaux, celui de N=4 en contient 87.
 
 ## Utilisation rapide
 - **Exécutable portable :** lancer `LogicNetworkExplorer.exe` (avec `rust_solver.exe` dans le même dossier pour bénéficier du moteur Rust).
