@@ -52,7 +52,7 @@ La suite des optima est référencée dans l'encyclopédie OEIS A003075 : 0, 1, 
 
 ### Exemple visuel : un réseau N=4 en 5 portes (optimum)
 
-![Réseau N=4 optimal en 5 comparateurs](schema_n4_optimal.png)
+![Réseau N=4 optimal en 5 comparateurs](schema_n4_opti.png)
 
 *Capture d'écran de l'application LogicNetworkExplorer. Chaque rectangle bleu/violet est un comparateur OR/AND. Les pastilles vertes à gauche sont les bits d'entrée (cliquables pour simuler). Les câbles sont numérotés de C₀ à C₃. À droite, le badge "TRIÉ OK" confirme que la sortie est correctement ordonnée.*
 
