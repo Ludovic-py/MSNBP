@@ -10,7 +10,7 @@ Outil de recherche, vérification et simulation visuelle de réseaux de tri / c�
   - *Permutations de sous-ensembles (Parallèle)* : exploration parallèle sur plusieurs workers.
 - **Vérificateur & Simulateur interactif :** table de vérité complète, détection des entrées en échec, simulation pas à pas et **mode édition à la souris** (ajout/suppression de connexions directement sur le schéma).
 - **Mode portable & cache local :** stocke les réglages et résultats dans `logic_network_data/` à côté de l'exécutable/script (avec repli mémoire si lecture seule).
-- **API HTTP locale** : contrôle à distance depuis l'agent AI pour piloter l'interface, injecter des solutions et lancer des analyses.
+- **API HTTP locale** : contrôle à distance depuis l'agent AI pour piloter l'interface, lancer des analyses en autopilot qui demande plus qu'une automatisation simple, ainsi que tenir le journal des decouvertes et des methodes utiles.
 - **Double panneau d'analyse** : compare deux collections côte-à-côte avec surbrillance des différences.
 - **Serveur de préfixes L1/L2** : extrait les motifs d'ouverture les plus fréquents et les réinjecte comme préfixe de recherche.
 - **Solveur Rust étendu** : support de N=8 avec type `U256` (2 × u128).
@@ -22,8 +22,8 @@ Outil de recherche, vérification et simulation visuelle de réseaux de tri / c�
 
 | N | Comparateurs optimaux | Solutions trouvées | Type de masque |
 |---|----------------------|-------------------|----------------|
-| 3 | 3 | — | `u64` |
-| 4 | 5 | — | `u64` |
+| 3 | 3 | 5 | `u64` |
+| 4 | 5 | 5 | `u64` |
 | 5 | 9 | 340 | `u64` |
 | 6 | 12 | 1 725 | `u64` |
 | 7 | 16 | **515** (5 familles de préfixes) | `u128` |
