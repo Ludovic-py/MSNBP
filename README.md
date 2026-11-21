@@ -1,13 +1,11 @@
 # MSNBP — Réseau de tri Binaire de Taille minimale
 *(Minimal Sorting Network with Binary Principle) — Projet MathsEnJeans 2024/2025*
 
-**Lycée Les Catalins (Montélimar)** — Atelier de recherche mathématique encadré par des chercheurs du laboratoire de mathématiques de Montélimar.
-
 Outil de recherche, vérification et simulation visuelle de réseaux de tri / câblages booléens minimaux, avec interface **Tkinter** en français, moteur **masques de bits** et solveur natif **Rust** multi-cœurs.
 
 ---
 
-## 📚 Glossaire pédagogique (pour enseignants de mathématiques)
+## 📚 Prérequis : comprendre les notations
 
 ### Qu'est-ce qu'un réseau de tri booléen ?
 
@@ -54,27 +52,9 @@ La suite des optima est référencée dans l'encyclopédie OEIS A003075 : 0, 1, 
 
 ### Exemple visuel : un réseau N=4 en 5 portes (optimum)
 
-```
-C₀ ──────┬───── E1 ───┬───── E3 ───┬───── E5 ────── C₀ trié (1 si présent)
-         │            │            │
-         │  OR/AND    │  OR/AND    │  OR/AND
-         │            │            │
-C₁ ──────┴───── E2 ───┤────────────┤─────────────── C₁
-                      │            │
-                      │  OR/AND    │  OR/AND
-                      │            │
-C₂ ──────────────────┴───── E4 ───┤─────────────── C₂
-                                  │
-                                  │  OR/AND
-                                  │
-C₃ ───────────────────────────────┴───────────────── C₃ trié (0 si présent)
-```
+![Réseau N=4 optimal en 5 comparateurs](schema_n4_optimal.png)
 
-**Légende :**
-- `───` fil transportant un bit (0 ou 1)
-- `┬─┴` comparateur reliant deux fils (porte OR/AND)
-- `E₁`, `E₂`... : étapes (comparateurs posés dans l'ordre)
-- À la fin, les bits sont triés : les 1 en haut, les 0 en bas
+*Capture d'écran de l'application LogicNetworkExplorer. Chaque rectangle bleu/violet est un comparateur OR/AND. Les pastilles vertes à gauche sont les bits d'entrée (cliquables pour simuler). Les câbles sont numérotés de C₀ à C₃. À droite, le badge "TRIÉ OK" confirme que la sortie est correctement ordonnée.*
 
 ### Qu'est-ce que la forme de Foata ?
 
