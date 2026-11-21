@@ -1,22 +1,117 @@
 # MSNBP — Réseau de tri Binaire de Taille minimale
-*(Minimal Sorting Network with Binary Principle)*
+*(Minimal Sorting Network with Binary Principle) — Projet MathsEnJeans 2024/2025*
+
+**Lycée Les Catalins (Montélimar)** — Atelier de recherche mathématique encadré par des chercheurs du laboratoire de mathématiques de Montélimar.
 
 Outil de recherche, vérification et simulation visuelle de réseaux de tri / câblages booléens minimaux, avec interface **Tkinter** en français, moteur **masques de bits** et solveur natif **Rust** multi-cœurs.
 
+---
+
+## 📚 Glossaire pédagogique (pour enseignants de mathématiques)
+
+### Qu'est-ce qu'un réseau de tri booléen ?
+
+Un **réseau de tri** est un circuit composé de **comparateurs** qui trie des listes de nombres. Dans notre projet, nous travaillons avec des **bits** (0 et 1) : chaque fil transporte une valeur 0 ou 1, et chaque comparateur est une **porte logique à deux entrées et deux sorties**.
+
+### Notations
+
+| Notation | Nom | Signification |
+|----------|------|-------------|
+| **N** | Nombre de câbles/fils | Exemple : N=7 signifie qu'on trie 7 bits d'entrée |
+| **C₀, C₁, ..., C_{N-1}** | Câbles | Les fils du circuit, numérotés de 0 (haut) à N-1 (bas) |
+| **E₁, E₂, ..., E_K** | Étapes | Chaque comparateur posé est une étape. E₁ est la première porte |
+| **(c₁, c₂)** | Paire de câbles | Une porte relie le câble c₁ et le câble c₂. Exemple : (0, 1) relie C₀ et C₁ |
+| **K** | Nombre total de portes | Taille du réseau. L'objectif est de minimiser K pour un N donné |
+| **OR / AND** | Portes logiques | « OU » et « ET » : les deux fonctions booléennes que chaque comparateur applique |
+| **u64 / u128 / U256** | Types de masques | Tailles d'entiers machine utilisées pour coder les bits : 64, 128 ou 256 bits |
+| **Écart (span)** | |c₂ - c₁| | Distance entre les deux câbles d'une porte. Écart 1 = adjacents |
+| **BFS** | Parcours en largeur | Algorithme qui explore toutes les possibilités couche par couche |
+| **Préfixe L1 / L2** | Premières couches | Les premières portes posées, souvent parallèles |
+| **Couche parallèle** | | Groupe de portes qui relient des paires de câbles **disjoints** (aucun câble commun) |
+
+### Qu'est-ce qu'une porte OR/AND ?
+
+Un comparateur (c₁, c₂) fonctionne ainsi :
+- **Sortie du haut** (câble c₁) : `max(entrée₁, entrée₂)` = `entrée₁ **OU** entrée₂`
+- **Sortie du bas** (câble c₂) : `min(entrée₁, entrée₂)` = `entrée₁ **ET** entrée₂`
+
+**Exemple concret :**
+Si C₀=1 et C₁=0 entrent dans un comparateur (0,1) :
+- C₀ sort = 1 OU 0 = **1** (le max)
+- C₁ sort = 1 ET 0 = **0** (le min)
+
+Après plusieurs portes, les bits se retrouvent triés : tous les 1 en haut, tous les 0 en bas.
+
+### Qu'est-ce que N ?
+
+**N** est le nombre de câbles (bits d'entrée). Par exemple :
+- **N=3** : trier 3 bits → optimum connu : 3 comparateurs
+- **N=5** : trier 5 bits → optimum : 9 comparateurs
+- **N=7** : trier 7 bits → optimum : 16 comparateurs (un grand classique)
+- **N=8** : trier 8 bits → optimum : 19 comparateurs
+
+La suite des optima est référencée dans l'encyclopédie OEIS A003075 : 0, 1, 3, 5, 9, 12, 16, 19, 25, ...
+
+### Exemple visuel : un réseau N=4 en 5 portes (optimum)
+
+```
+C₀ ──────┬───── E1 ───┬───── E3 ───┬───── E5 ────── C₀ trié (1 si présent)
+         │            │            │
+         │  OR/AND    │  OR/AND    │  OR/AND
+         │            │            │
+C₁ ──────┴───── E2 ───┤────────────┤─────────────── C₁
+                      │            │
+                      │  OR/AND    │  OR/AND
+                      │            │
+C₂ ──────────────────┴───── E4 ───┤─────────────── C₂
+                                  │
+                                  │  OR/AND
+                                  │
+C₃ ───────────────────────────────┴───────────────── C₃ trié (0 si présent)
+```
+
+**Légende :**
+- `───` fil transportant un bit (0 ou 1)
+- `┬─┴` comparateur reliant deux fils (porte OR/AND)
+- `E₁`, `E₂`... : étapes (comparateurs posés dans l'ordre)
+- À la fin, les bits sont triés : les 1 en haut, les 0 en bas
+
+### Qu'est-ce que la forme de Foata ?
+
+Deux comparateurs **disjoints** (qui ne touchent pas les mêmes câbles) peuvent être **échangés** sans changer le résultat. Par exemple (0,1) et (2,3) peuvent être inversés car ils n'ont aucun câble commun.
+
+La **forme normale de Foata** consiste à regrouper les portes en **couches** :
+- Chaque couche ne contient que des comparateurs disjoints
+- On remplit chaque couche au maximum avant de passer à la suivante
+
+Cette normalisation permet de **comparer** deux réseaux qui effectuent le même tri mais dans un ordre différent, et de réduire l'espace de recherche.
+
+### Qu'est-ce que la symétrie par réflexion ?
+
+Si on prend un réseau et qu'on le **retourne** (haut ↔ bas), on obtient un autre réseau valide. Mathématiquement : remplacer chaque porte (c₁, c₂) par (N-1-c₁, N-1-c₂).
+
+Cette symétrie permet de diviser par 2 le nombre de cas à explorer.
+
+### Qu'est-ce qu'une projection N → N-1 ?
+
+Si on **supprime** le câble du haut (C₀) ou du bas (N-1) d'un réseau, ainsi que toutes les portes qui y sont connectées, on obtient un réseau valide pour N-1 câbles. Cette propriété permet de **construire des réseaux optimaux par récurrence**.
+
+---
+
 ## Fonctionnalités
 - **Recherche de câblages minimaux :**
-  - *Couches BFS — Moteur Rust (Multi-cœurs)* : recherche par profondeur avec masques de bits (`u64` / `u128` / `u256`) et déduplication d'états.
+  - *Couches BFS — Moteur Rust (Multi-cœurs)* : recherche par profondeur avec masques de bits (`u64` / `u128` / `U256`) et déduplication d'états.
   - *Couches BFS + Dédup. d'états (Python)* : repli portable sans binaire Rust.
   - *Permutations de sous-ensembles (Parallèle)* : exploration parallèle sur plusieurs workers.
 - **Vérificateur & Simulateur interactif :** table de vérité complète, détection des entrées en échec, simulation pas à pas et **mode édition à la souris** (ajout/suppression de connexions directement sur le schéma).
 - **Mode portable & cache local :** stocke les réglages et résultats dans `logic_network_data/` à côté de l'exécutable/script (avec repli mémoire si lecture seule).
 - **API HTTP locale** : contrôle à distance depuis l'agent AI pour piloter l'interface, injecter des solutions et lancer des analyses.
 - **Double panneau d'analyse** : compare deux collections côte-à-côte avec surbrillance des différences.
-- **Serveur de préfixes L1/L2** : extrait les motifs d'ouverture les plus fréquents et les réinjecte comme préfixe de recherche.
+- **Workflow L1/L2** : extrait les motifs d'ouverture les plus fréquents et les réinjecte comme préfixe de recherche.
 - **Solveur Rust étendu** : support de N=8 avec type `U256` (2 × u128).
 - **Support des préfixes de recherche** : option `--prefix` pour fixer les premières couches et réduire l'espace d'état.
-- **Coupe de commutation Foata** : option `--no-foata` pour désactiver.
-- **Filtre d'écart final** : option `--no-final-span-1` pour explorer des motifs de fermeture variés.
+- **Coupe de commutation Foata** : évite d'explorer des permutations équivalentes.
+- **Filtre d'écart final** : les réseaux optimaux finissent toujours par des portes adjacentes.
 
 ## Résultats de recherche
 
