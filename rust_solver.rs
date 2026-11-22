@@ -132,6 +132,25 @@ impl MaskWord for U256 {
     fn bitand(self, rhs: Self) -> Self { U256(self.0 & rhs.0, self.1 & rhs.1) }
 }
 
+// u384 pour N=9 (3 × u128)
+#[derive(Copy, Clone, Default, Hash, Eq, PartialEq)]
+struct U384(u128, u128, u128);
+
+impl MaskWord for U384 {
+    #[inline]
+    fn zero() -> Self { U384(0, 0, 0) }
+    #[inline]
+    fn bit(pos: usize) -> Self {
+        if pos < 128 { U384(1u128 << pos, 0, 0) }
+        else if pos < 256 { U384(0, 1u128 << (pos - 128), 0) }
+        else { U384(0, 0, 1u128 << (pos - 256)) }
+    }
+    #[inline]
+    fn bitor(self, rhs: Self) -> Self { U384(self.0 | rhs.0, self.1 | rhs.1, self.2 | rhs.2) }
+    #[inline]
+    fn bitand(self, rhs: Self) -> Self { U384(self.0 & rhs.0, self.1 & rhs.1, self.2 & rhs.2) }
+}
+
 fn initial_wire_masks<W: MaskWord, const MAX_N: usize>(n: usize) -> [W; MAX_N] {
     let total_combos = 1usize << n;
     let mut masks = [W::zero(); MAX_N];
@@ -653,8 +672,8 @@ fn parse_args() -> Result<Config, String> {
         i += 1;
     }
 
-    if num_cables < 2 || num_cables > 8 {
-        return Err(format!("Unsupported --cables {} (Rust bitmask solver supports 2..=8 cables).", num_cables));
+    if num_cables < 2 || num_cables > 9 {
+        return Err(format!("Unsupported --cables {} (Rust bitmask solver supports 2..=9 cables).", num_cables));
     }
     if num_cables == 8 && !prefix.is_empty() {
         // N=8 n'a de sens qu'avec un prefixe fort (sinon explosion combinatoire)
@@ -690,7 +709,9 @@ fn main() {
         run_layer_bfs::<u64, 6>(&cfg);
     } else if cfg.num_cables == 7 {
         run_layer_bfs::<u128, 7>(&cfg);
-    } else {
+    } else if cfg.num_cables == 8 {
         run_layer_bfs::<U256, 8>(&cfg);
+    } else {
+        run_layer_bfs::<U384, 9>(&cfg);
     }
 }
