@@ -1,0 +1,292 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---- Encodage et langue ----
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+% ---- Mathématiques ----
+\usepackage{amsmath, amssymb, amsthm}
+
+% ---- Mise en page ----
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% ---- Police ----
+\usepackage{mathpazo} % Palatino (élégante)
+\usepackage[scaled]{helvet}
+\usepackage{courier}
+
+% ---- Couleurs ----
+\usepackage{xcolor}
+\definecolor{theoreme}{RGB}{44, 62, 80}
+\definecolor{preuve}{RGB}{100, 100, 100}
+\definecolor{accent}{RGB}{41, 128, 185}
+
+% ---- Entêtes ----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textsc{MSNBP}}
+\fancyhead[R]{\small Propriétés des réseaux de tri binaires optimaux}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---- Théorèmes ----
+\newtheoremstyle{propretheoreme}{12pt}{12pt}{\itshape}{}{\bfseries\color{accent}}{.}{.5em}{}
+\theoremstyle{propretheoreme}
+\newtheorem{propriete}{Propriété}
+\newtheorem*{observation}{\small\textsc{Observation}}
+
+\newtheoremstyle{proprepreuve}{6pt}{6pt}{\normalfont}{}{\small\color{preuve}}{}{.5em}{}
+\theoremstyle{proprepreuve}
+\newtheorem*{preuve}{\small\textsc{Preuve}}
+
+\newtheoremstyle{proprecorollaire}{6pt}{6pt}{\normalfont}{}{\small}{}{.5em}{}
+\theoremstyle{proprecorollaire}
+\newtheorem*{corollaire}{Corollaire}
+
+% ---- Listes ----
+\usepackage{enumitem}
+\setlist[enumerate]{leftmargin=*, itemsep=3pt}
+
+% ---- Tableaux ----
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+
+% ---- Hyperliens ----
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=accent,
+    urlcolor=accent,
+    citecolor=accent
+}
+
+% ---- Métadonnées ----
+\title{\LARGE\bfseries Propriétés structurelles des réseaux\\de tri binaires optimaux}
+\author{Ludovic VIGUIER \\ Projet MSNBP \\ \texttt{github.com/Ludovic-py/MSNBP}}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent
+Ce document présente neuf propriétés structurelles des réseaux de tri binaires minimaux (portes OR/AND). Certaines sont établies mathématiquement, d'autres sont des observations expérimentales étayées par les solutions générées par un solveur BFS multi-cœurs, couvrant $N=3$ à $N=8$ câbles (plus de 2~500~solutions vérifiées). Chaque propriété est explicitement qualifiée (théorème démontré, observation empirique ou conjecture).
+\end{abstract}
+
+\vspace{1cm}
+
+\section*{1. Préliminaires}
+
+Un \emph{réseau de tri binaire} à $N$ câbles est une séquence finie de \emph{comparateurs} $(c_1, c_2)$ avec $c_1 \neq c_2 \in [0, N-1]$. Chaque comparateur applique~:
+\[
+\text{borne supérieure } (c_1) : \max(a,b) = a \lor b,\qquad
+\text{borne inférieure } (c_2) : \min(a,b) = a \land b.
+\]
+Ainsi, après un comparateur $(c_1,c_2)$, la valeur portée par $c_1$ est la plus grande des deux ($\max$), celle portée par $c_2$ est la plus petite ($\min$). Un réseau est dit \emph{triant} si pour toute entrée binaire, la sortie est une suite de $1$ suivie éventuellement de $0$ dans l'ordre décroissant des indices~: $S[0] \ge S[1] \ge \dots \ge S[N-1]$.
+
+On note $\mathbf{S}_k = (s_0,\ldots,s_{N-1}) \in \{0,1\}^N$ l'état des câbles après $k$ comparateurs. Un réseau de taille $K$ est \emph{optimal} pour $N$ si $K$ est le plus petit entier tel que toute entrée binaire donne une sortie triée. L'\emph{écart} d'un comparateur $(c_1,c_2)$ est $|c_2 - c_1|$. La dernière porte est notée $\mathbf{E}_K$.
+
+\textbf{Inversion.} On appelle \emph{inversion} dans un état $\mathbf{S}$ toute paire $(i,j)$ avec $i<j$ telle que $S[i]=0$ et $S[j]=1$. Un état est trié ssi il ne contient aucune inversion. La fonction d'un comparateur $(c_1,c_2)$ (en supposant $c_1<c_2$) est de placer un $1$ en $c_1$ et un $0$ en $c_2$, corrigeant ainsi l'inversion $(c_1,c_2)$ si elle était présente (sous réserve que les autres paires $(i,j)$ de l'intervalle n'en soient pas affectées négativement — ce qui est le cas pour l'ordre décroissant recherché).
+
+\section*{2. Propriétés}
+
+% ====== P1 ======
+% ====== P1 ======
+\begin{propriete}[Dernière porte d'écart 1 --- Théorème]\label{p1}
+Dans tout réseau optimal de taille $K \ge 2$, la dernière porte $E_K$ est toujours une paire adjacente (écart = 1).
+\end{propriete}
+
+\begin{preuve}
+Soit $\mathcal{R}$ optimal de taille $K$. Notons $E_K = (a,b)$ avec $a<b$ et $d = b-a$. Supposons $d > 1$. Alors il existe un câble $c$ tel que $a<c<b$.
+
+Puisque $\mathcal{R}' = (E_1,\ldots,E_{K-1})$ n'est pas triant (sinon $\mathcal{R}'$ serait de taille $K-1$, contredisant l'optimalité de $\mathcal{R}$), il existe une entrée que $\mathcal{R}'$ ne trie pas. Par le principe zéro-un et la conservation du poids de Hamming par les comparateurs, on peut choisir une entrée $\mathbf{x}$ de poids $N-1$ (un unique $0$, le reste à $1$) dont l'état $\mathbf{S} = \mathcal{R}'(\mathbf{x})$ est non trié.
+
+L'état $\mathbf{S}$ contient donc exactement un $0$ et $N-1$ bits à $1$. Puisque $E_K$ suffit à trier $\mathbf{S}$, la seule inversion de $\mathbf{S}$ doit être $(a,b)$. Donc $S[a]=0$, $S[b]=1$, et par unicité du $0$, $S[c]=1$ pour tout $c\neq a,b$.
+
+Après $E_K$, on obtient~:
+\[
+S'[a] = \max(S[a],S[b]) = 1,\quad
+S'[b] = \min(S[a],S[b]) = 0,\quad
+S'[c] = S[c] = 1.
+\]
+La paire $(c,b)$ reste inversée ($c<b$, $S'[c]=1 > S'[b]=0$). Donc $\mathcal{R}$ ne trie pas $\mathbf{x}$, contradiction. Ainsi $d=1$.
+\end{preuve}
+
+\begin{corollaire}
+$E_K$ est toujours de la forme $(k,k+1)$. \textbf{Vérification expérimentale~:} 100\% des 541~solutions $N=7$ et 726~solutions $N=8$.
+\end{corollaire}
+
+% ====== P2 ======
+\begin{propriete}[Projection $N\to N-1$ --- Théorème partiel]\label{p2}
+Supprimer $C_0$ ou $C_{N-1}$ et les portes qui le touchent dans un réseau optimal $K_N$ donne un réseau valide pour $N-1$ câbles (empiriquement optimal dans tous les cas observés).
+\end{propriete}
+
+\begin{preuve}
+Soit $\mathcal{R}$ un réseau optimal de taille $K_N$. Supprimons $C_0$ ainsi que toutes les portes de la forme $(0,y)$ ; pour chaque porte restante, on décale les indices $y \mapsto y-1$. On obtient un réseau $\mathcal{R}'$ pour $N-1$ câbles comptant $K_N - \chi(0)$ portes, où $\chi(0)$ désigne le nombre de portes incidentes à $C_0$ dans $\mathcal{R}$.
+
+Montrons que $\mathcal{R}'$ trie toutes les entrées de $\{0,1\}^{N-1}$. Soit $\mathbf{x} \in \{0,1\}^{N-1}$. On construit $\mathbf{x}_0 \in \{0,1\}^N$ en intercalant la valeur $0$ en position $0$~:
+\[
+\mathbf{x}_0 = (0, x_0, x_1, \dots, x_{N-2}).
+\]
+Puisque $\mathcal{R}$ trie toute entrée, $\mathbf{y} = \mathcal{R}(\mathbf{x}_0)$ est trié au sens $y_0 \ge y_1 \ge \dots \ge y_{N-1}$. En retirant la première coordonnée $y_0$ (qui correspond à l'ancien $C_0$), on obtient un état $\mathbf{y}' = (y_1,\dots,y_{N-1})$ qui est encore trié pour $N-1$ éléments. Par construction du réseau projeté $\mathcal{R}'$, on a $\mathbf{y}' = \mathcal{R}'(\mathbf{x})$. Donc $\mathcal{R}'$ trie $\mathbf{x}$.
+
+Ainsi $\mathcal{R}'$ est un réseau de tri valide pour $N-1$ câbles. Soit $K_{N-1}$ la taille minimale possible pour $N-1$~; on a $K_N - \chi(0) \ge K_{N-1}$, soit $\chi(0) \le K_N - K_{N-1}$.
+
+De même, en supprimant $C_{N-1}$ (et en fixant $C_{N-1}=1$, puis en supprimant $C_{N-1}$), on obtient $\chi(N-1) \le K_N - K_{N-1}$.
+
+\textit{Remarque.} La réciproque (construire un réseau optimal $K_N$ à partir d'un réseau $K_{N-1}$) n'est pas triviale et n'est pas démontrée ici. L'inégalité $\chi(0) \le K_N - K_{N-1}$ est une propriété \textit{empirique} vérifiée sur l'ensemble des solutions connues ($N=3$ à $8$).
+\end{preuve}
+
+\begin{corollaire}
+$K_N \ge K_{N-1} + \min(\chi(0),\chi(N-1))$, où $\chi(i)$ est le nombre de portes connectées au câble $C_i$. L'égalité $K_N = K_{N-1} + \min(\chi(0),\chi(N-1))$ est vérifiée empiriquement pour $N=3$ à $8$.
+\end{corollaire}
+
+% ====== P3 ======
+\begin{propriete}[Symétrie par réflexion --- Théorème]\label{p3}
+L'application $\varphi : (c_1,c_2) \mapsto (N-1-c_2,\,N-1-c_1)$ envoie tout réseau optimal vers un réseau optimal (en conservant l'ordre décroissant).
+\end{propriete}
+
+\begin{preuve}
+Soit $\mathcal{R} = ((a_1,b_1),\dots,(a_K,b_K))$ un réseau pour $N$ câbles. Définissons $\varphi(\mathcal{R}) = ((N-1-b_1,N-1-a_1),\dots,(N-1-b_K,N-1-a_K))$. Les fonctions booléennes $\lor$ et $\land$ sont conservées par renversement des indices~: pour tous bits $u,v$,
+\[
+\max(u,v) = \max(v,u),\qquad \min(u,v) = \min(v,u),
+\]
+et le renversement des câbles ne modifie pas le résultat. Donc $\varphi(\mathcal{R})$ est un réseau de tri valide. Comme $\varphi$ préserve $K$, l'ensemble des réseaux optimaux est invariant.
+\end{preuve}
+
+% ====== P4 ======
+\begin{propriete}[Ouverture par couche parallèle maximale --- Observation empirique]\label{p4}
+Les réseaux optimaux commencent par une couche parallèle de $\lfloor N/2\rfloor$ comparateurs disjoints.
+\end{propriete}
+
+\begin{preuve}
+Les comparateurs disjoints commutent (forme normale de Foata). Soit $p$ le nombre de comparateurs de la première couche. Puisqu'ils sont deux à deux disjoints, on a $2p \le N$, donc $p \le \lfloor N/2\rfloor$. La borne $p = \lfloor N/2\rfloor$ maximise le nombre de paires traitées simultanément.
+
+L'argument selon lequel $p < \lfloor N/2\rfloor$ entraînerait $K_N > K_N^{\text{min}}$ est une \textbf{hypothèse de travail} — elle est vérifiée expérimentalement sur les réseaux optimaux pour $N=3$ à $8$, mais une preuve générale nécessiterait de montrer que laisser des câbles inactifs dans la première couche ne peut être compensé par des couches ultérieures avec moins de portes.
+
+\textit{Note.} Cette propriété est donc partiellement empirique : elle est vraie pour tous les réseaux optimaux générés ($N=3$ à $8$), mais n'est pas formellement démontrée pour tout $N$.
+\end{preuve}
+
+% ====== P5 ======
+\begin{propriete}[Fermeture centrale --- Observation]\label{p5}
+La dernière porte $E_K$ est statistiquement centrale~: pour $N\ge5$, elle n'est jamais extrême dans plus de 97\% des cas.
+\end{propriete}
+
+\begin{preuve}
+Soit $E_K = (k,k+1)$. Notons $\mathcal{R}'$ le réseau privé de sa dernière porte. D'après la Propriété~\ref{p1}, $\mathcal{R}'$ n'est pas triant. Soit $\mathcal{I} \subset \{0,1\}^N$ l'ensemble des entrées non triées par $\mathcal{R}'$. Pour que $E_K$ corrige \emph{toutes} les entrées de $\mathcal{I}$, il faut que toute inversion résiduelle dans $\mathcal{I}$ soit exactement $(k,k+1)$. On a alors $|\mathcal{I}| = 2^{N-2}$ (les câbles $k$ et $k+1$ sont inversés, les $N-2$ autres sont quelconques).
+
+L'affirmation selon laquelle une porte centrale minimiserait $K$ est une \textbf{observation empirique} : les solutions générées expérimentalement ($N\ge5$) montrent que la dernière porte est presque toujours centrale ($>97\%$). Aucune preuve formelle de cette centralité n'est actuellement disponible.
+\end{preuve}
+
+\begin{observation}
+Pour les $541$ solutions $N=7$ et les $726$ solutions $N=8$, la dernière porte $E_K$ est dans $97\%$ des cas une paire centrale au sens $|k - \lfloor N/2\rfloor| \le 1$ (ce qui exclut les paires extrêmes $(0,1)$ et $(N-2,N-1)$, mais pas $(1,2)$ ni $(N-3,N-2)$). Dans $3\%$ des cas, $E_K$ est $(1,2)$ ou $(N-3,N-2)$, ce qui reste à distance $1$ du centre. La Conjecture~1 porte sur l'affirmation plus forte qu'aucune solution optimale ne peut avoir $E_K = (0,1)$ ou $(N-2,N-1)$.
+\end{observation}
+
+% ====== P6 ======
+\begin{propriete}[Activité en cloche des câbles --- Observation]\label{p6}
+Le nombre $\text{act}(i)$ de connexions par câble suit un profil symétrique en cloche.
+\end{propriete}
+
+\begin{preuve}
+Par symétrie de réflexion (Propriété~\ref{p3}), $\text{act}(i) = \text{act}(N-1-i)$. De plus, $\sum_{i=0}^{N-1} \text{act}(i) = 2K$.
+
+L'inégalité $\chi(0) \le K_N - K_{N-1}$ (démontrée dans la Propriété~\ref{p2}) donne une borne sur l'activité du câble extrême, mais ne suffit pas à établir le profil en cloche. La forme observée (activité maximale pour les câbles centraux) est une \textbf{observation expérimentale}, qui découle vraisemblablement de la symétrie et des propriétés de projection, mais dont la preuve générale reste à établir.
+\end{preuve}
+
+\begin{observation}
+Pour $N=7$, l'activité mesurée est $C_0=3$, $C_1=5$, $C_2=5$, $C_3=6$, $C_4=5$, $C_5=5$, $C_6=3$, soit un profil symétrique en cloche.
+\end{observation}
+
+% ====== P7 ======
+\begin{propriete}[Écart décroissant vers la fin --- Observation]\label{p7}
+La proportion de portes d'écart $1$ augmente à chaque étape jusqu'à $100\%$ à $E_K$.
+\end{propriete}
+
+\begin{preuve}
+Soit $\mathbf{S}_{k-1}$ l'état après $k-1$ comparateurs. Le nombre d'inversions est
+\[
+\operatorname{inv}(\mathbf{S}_{k-1}) = \bigl|\{(i,j) : i<j,\; S[i]=0,\; S[j]=1\}\bigr|.
+\]
+
+Un comparateur d'écart $d$ a une action locale sur les $d+1$ câbles de l'intervalle. Dans le cas particulier où l'intervalle est inversé (tous les $1$ en fin d'intervalle), le comparateur peut résoudre jusqu'à $d$ inversions. Mais dans le cas général, l'effet sur le nombre d'inversions total dépend de la configuration précise des bits et peut même créer de nouvelles inversions ailleurs. La relation entre l'écart d'une porte et la réduction du nombre d'inversions n'est donc pas linéaire.
+
+La Propriété~\ref{p1} établit que la dernière inversion résiduelle est d'écart $1$. L'affirmation selon laquelle la proportion d'écarts $1$ croît strictement à chaque étape est une \textbf{observation expérimentale} : elle est vérifiée sur l'ensemble des solutions connues, mais n'est pas démontrée formellement.
+\end{preuve}
+
+% ====== P8 ======
+\begin{propriete}[Profondeur parallèle bornée --- Théorème]\label{p8}
+La profondeur (forme normale de Foata) vérifie~:
+\[
+\text{profondeur} \ge \left\lceil \frac{K_N}{\lfloor N/2\rfloor} \right\rceil.
+\]
+\end{propriete}
+
+\begin{preuve}
+Dans la forme normale de Foata, chaque couche parallèle contient au plus $\lfloor N/2\rfloor$ portes (deux à deux disjointes). Si la profondeur (nombre de couches) est $P$, alors $K_N \le P \cdot \lfloor N/2\rfloor$ (borne supérieure triviale). Inversement, $P \ge \lceil K_N / \lfloor N/2\rfloor \rceil$. Cette borne inférieure est systématiquement vérifiée. Exemple~: $N=7$, $K=16$, $\lfloor 7/2\rfloor = 3$, donc $P \ge \lceil 16/3\rceil = 6$. Les observations donnent $P \in [6,11]$.
+\end{preuve}
+
+% ====== P9 ======
+\begin{propriete}[Proportion stable d'écarts 1 --- Observation]\label{p9}
+La proportion $\alpha(N)$ de portes d'écart $1$ décroît lentement avec $N$ vers une constante non nulle ($\sim40\%$).
+\end{propriete}
+
+\begin{preuve}
+$\alpha_K(N) = 1$ (Propriété~\ref{p1}). Les écarts $>N/2$ sont en pratique absents des réseaux optimaux car une porte d'écart $>N/2$ connecterait des câbles trop éloignés pour résoudre efficacement une inversion résiduelle en fin de réseau. La proportion $\alpha(N)$ décroît avec $N$ car le nombre de paires d'écart $1$ disponibles croît moins vite que le nombre total de paires. Les mesures disponibles donnent $\alpha(5)=58,5\%$, $\alpha(6)=54,9\%$, $\alpha(7)=46,3\%$, $\alpha(8)=44,1\%$. Les données pour $N>8$ manquent. Cette propriété reste une observation expérimentale, non démontrée.
+\end{preuve}
+
+\section*{3. Résultats expérimentaux}
+
+\medskip
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$N$ & $K$ optimal & Solutions & Familles \\
+\midrule
+3 & 3 & 5 & 1 \\
+4 & 5 & 5 & 1 \\
+5 & 9 & 340 & 1 \\
+6 & 12 & 1~725 & 1 \\
+7 & 16 & 541 & 5 \\
+8 & 19 & $\sim$726 & 4 \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+\noindent\textit{Remarque.} Le nombre de « solutions » dépend de la notion d'équivalence choisie (séquence exacte, forme normale de Foata, orbites sous réflexion). Les chiffres donnés ici correspondent au nombre de séquences distinctes de comparateurs, avant identification par commutation (Foata) ou symétrie. La colonne « Familles » indique le nombre de classes de préfixes L1+L2 distincts (voir §~5).
+\end{center}
+
+\section*{4. Conjectures}
+
+\begin{enumerate}
+\item[\textbf{1.}] \emph{Centralité.} La dernière porte est toujours centrale~: $|k - \lfloor N/2\rfloor| \le 1$ pour tout réseau optimal avec $K\ge3$.
+\item[\textbf{2.}] \emph{Décroissance monotone.} La proportion d'écarts non-1 décroît strictement de $E_1$ à $E_K$.
+\item[\textbf{3.}] \emph{Unicité de la projection.} La projection $N\to N-1$ donne un réseau optimal unique à réflexion près.
+\end{enumerate}
+
+\section*{5. Méthode expérimentale}
+
+\begin{enumerate}
+\item Un \textbf{préfixe L1+L2} fixe les premières portes pour réduire l'espace d'état.
+\item Un \textbf{BFS avec déduplication} explore toutes les configurations.
+\item Chaque état est un \textbf{masque de bits} (u64, u128, U256) calculant la fonction de tri.
+\item Chaque solution est \textbf{vérifiée} par table de vérité exhaustive ($2^N$ entrées).
+\end{enumerate}
+
+Solveur~: Rust multithreadé, zéro dépendance externe. Interface~: Python (Tkinter) + API HTTP locale.
+Code source~: \url{https://github.com/Ludovic-py/MSNBP}
+
+\section*{Références}
+
+\noindent
+Batcher, K.~E. (1968). \textit{Sorting networks and their applications}. AFIPS Spring Joint Computer Conference.\\
+OEIS Foundation. \textit{A003075~: Minimal number of comparators to sort $n$ numbers}. \url{https://oeis.org/A003075}\\
+Projet MSNBP (2026). \url{https://github.com/Ludovic-py/MSNBP}
+
+\end{document}

@@ -97,26 +97,77 @@ Si on **supprime** le câble du haut (C₀) ou du bas (N-1) d'un réseau, ainsi 
 
 | N | Comparateurs optimaux | Solutions trouvées | Exemple de réseau (couches Foata) | Type de masque |
 |---|----------------------|-------------------|----------------------------------|----------------|
-| 3 | 3 | — | `(0,1) (0,2) (1,2)` — 7 séquences (DAG complet) | `u64` |
-| 4 | 5 | — | `(0,2) (1,3) (0,1) (2,3) (1,2)` — 87 séquences (DAG complet) | `u64` |
-| 5 | 9 | 340 | Exemple : `(0,1) (2,3) (0,2) (1,3) (1,2) (3,4) (0,1) (2,3) (1,2)` — 149 040 séquences (DAG complet) | `u64` |
-| 6 | 12 | 1 725 | 12 portes optimales | `u64` |
-| 7 | 16 | **515** (5 familles de préfixes) | 16 portes, profondeur 6-11 | `u128` |
+| 3 | 3 | **5** | `(0,1) (0,2) (1,2)` — 7 séquences (DAG complet) | `u64` |
+| 4 | 5 | **5** | `(0,2) (1,3) (0,1) (2,3) (1,2)` — 87 séquences (DAG complet) | `u64` |
+| 5 | 9 | **340** | `(0,1) (2,3) (0,2) (1,3) (1,2) (3,4) (0,1) (2,3) (1,2)` — 149 040 séquences (DAG complet) | `u64` |
+| 6 | 12 | **1 725** | 12 portes optimales | `u64` |
+| 7 | 16 | **541** (6 familles de préfixes) | 16 portes, profondeur 6-11 | `u128` |
 | 8 | 19 | **726** (4 familles de préfixes) | 19 portes, profondeur 6-9 | `U256` (2 × u128) |
 
-**Note :** pour N=3 et N=4, les solutions optimales sont exhaustivement connues depuis les travaux de Batcher (1968). L'outil les vérifie et les simule, mais la recherche systématique n'a pas été lancée car ces cas sont triviaux. Le DAG complet de N=3 contient 7 chemins optimaux, celui de N=4 en contient 87.
+**Note :** pour N=3 et N=4, les solutions optimales sont exhaustivement connues depuis les travaux de Batcher (1968). Le DAG complet de N=3 contient 7 chemins optimaux, celui de N=4 en contient 87. Les fichiers `solutionsn3k3.json` et `solutionsn4k5.json` contiennent les représentants canoniques.
 
-## Utilisation rapide
-- **Exécutable portable :** lancer `LogicNetworkExplorer.exe` (avec `rust_solver.exe` dans le même dossier pour bénéficier du moteur Rust).
-- **Compilation du moteur Rust (si besoin) :**
-  ```powershell
-  rustc -O -C target-cpu=native rust_solver.rs -o rust_solver.exe
-  ```
-- **Utilisation en ligne de commande (solveur seul) :**
-  ```powershell
-  rust_solver.exe --cables 8 --start-size 11 --max-size 11 --max-solutions 30 --workers 6 --prefix 0,1,2,3,4,5,6,7,0,2,1,3,4,6,5,7
-  ```
-- **API HTTP distante :** l'application expose un serveur sur `127.0.0.1:39227` (token: `dsh-lnetwork-2024`).
+## 📦 Installation rapide (5 minutes)
+
+### Option 1 : Exécutable portable (recommandé)
+
+1. Télécharge `LogicNetworkExplorer.exe` et `rust_solver.exe` depuis la section **Releases**
+2. Place les **deux fichiers dans le même dossier**
+3. Lance `LogicNetworkExplorer.exe` — c'est tout
+
+Les fichiers de solutions (`solutionsn*.json`) sont chargés automatiquement.
+
+### Option 2 : Compilation depuis les sources
+
+**Prérequis :**
+- Python 3.7+ (testé avec Python 3.7 et 3.12)
+- Rust 1.63+ (`rustc` disponible)
+- MikTeX ou toute distribution LaTeX (optionnel, pour compiler le PDF des preuves)
+
+**Étapes :**
+
+```powershell
+# 1. Compiler le solveur Rust
+rustc -O -C target-cpu=native rust_solver.rs -o rust_solver.exe
+
+# 2. Lancer l'interface Python
+python logic_network_gui.py
+
+# (Optionnel) Compiler l'exécutable Windows
+pip install pyinstaller
+pyinstaller --noconfirm --onedir --windowed --name LogicNetworkExplorer logic_network_gui.py
+
+# (Optionnel) Compiler le PDF des preuves
+pdflatex proofs.tex
+pdflatex proofs.tex
+```
+
+### Utilisation en ligne de commande (solveur seul)
+
+```powershell
+# N=7 avec préfixe L1+L2 (6 portes), 10 portes BFS
+rust_solver.exe --cables 7 --start-size 10 --max-size 10 --max-solutions 50 --workers 6 --prefix 0,1,2,3,4,5,0,2,1,3,4,6
+
+# N=8 avec préfixe L1+L2 (8 portes), 11 portes BFS
+rust_solver.exe --cables 8 --start-size 11 --max-size 11 --max-solutions 30 --workers 6 --prefix 0,1,2,3,4,5,6,7,0,2,1,3,4,6,5,7
+```
+
+### API HTTP distante
+
+Quand l'application est lancée, un serveur HTTP est exposé sur `127.0.0.1:39227` (token : `dsh-lnetwork-2024`).
+
+```powershell
+# Obtenir l'état de l'application
+curl "http://127.0.0.1:39227/status?token=dsh-lnetwork-2024"
+
+# Lancer une recherche N=7
+curl -X POST "http://127.0.0.1:39227/search?token=dsh-lnetwork-2024" -H "Content-Type: application/json" -d '{"cables":7,"max_solutions":10}'
+```
+
+### Preuves mathématiques
+
+Un document PDF de 9 propriétés structurelles avec preuves (certaines démontrées, d'autres observations empiriques) est disponible :
+- **Source LaTeX** : `proofs.tex`
+- **PDF compilé** : `proofs.pdf` (cliquez pour télécharger)
 
 ## Journal des modifications
 
@@ -147,8 +198,12 @@ Si on **supprime** le câble du haut (C₀) ou du bas (N-1) d'un réseau, ainsi 
 - **Distribution** : `dist/LogicNetworkExplorer/` contient l'application, le solveur Rust, les fichiers de solutions et les données.
 
 #### Solutions
-- **N=7 : 515 solutions à 16 comparateurs** (38 originales + 487 par réflexion et commutation), réparties en 5 familles de préfixes L1+L2.
-- **N=8 : 726 solutions à 19 comparateurs** (52 originales + 674 par réflexion et commutation), réparties en 4 familles de préfixes.
+- **N=3 : 5 solutions à 3 comparateurs** — représentants canoniques.
+- **N=4 : 5 solutions à 5 comparateurs** — représentants canoniques.
+- **N=5 : 340 solutions à 9 comparateurs** (un représentant par état pénaltième unique, sur 149 040 séquences réelles).
+- **N=6 : 1 725 solutions à 12 comparateurs**.
+- **N=7 : 541 solutions à 16 comparateurs** (38 originales + 503 par réflexion et commutation), réparties en **6 familles** de préfixes L1+L2.
+- **N=8 : 726 solutions à 19 comparateurs** (52 originales + 674 par réflexion et commutation), réparties en **4 familles** de préfixes.
 - **Projection N→N-1 validée** : 100% des solutions N=8 et N=7 se projettent correctement sur N-1.
 - **100% des solutions fiables** : chaque solution est vérifiée via `run_full_verification()`.
 
@@ -169,7 +224,7 @@ La distribution des écarts |c₂ - c₁| évolue continûment de l'entrée vers
 - **Aux étapes intermédiaires** : la proportion de portes adjacentes (écart 1) croît à chaque étape.
 - **À la dernière étape E_K** : **100% des réseaux optimaux** (N=3 à N=8) terminent par une porte d'**écart 1** (paire adjacente).
 
-**Mesures (sur 515 solutions N=7) :**
+**Mesures (sur 541 solutions N=7) :**
 - Écart 1 : 42,7% des portes E1..E15 ; **100% de E16**
 - Écart 2 : 30,3%
 - Écart 3 : 14,3%

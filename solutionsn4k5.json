@@ -1,0 +1,192 @@
+{
+  "search_config": {
+    "num_cables": 4,
+    "start_size": 5,
+    "max_size": 12,
+    "max_solutions": 5,
+    "workers": 7,
+    "prune_noops": true,
+    "search_mode": "rust_layer_dedup"
+  },
+  "summary": {
+    "solutions_found": 5,
+    "cancelled": false,
+    "from_cache": false,
+    "elapsed_sec": 1.015,
+    "evaluations_checked": 1344
+  },
+  "solutions": [
+    [
+      {
+        "cable1": 1,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 0,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 0,
+        "cable2": 1,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 2,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      }
+    ],
+    [
+      {
+        "cable1": 0,
+        "cable2": 1,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 2,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 0,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      }
+    ],
+    [
+      {
+        "cable1": 0,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 0,
+        "cable2": 1,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 2,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      }
+    ],
+    [
+      {
+        "cable1": 0,
+        "cable2": 1,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 0,
+        "cable2": 1,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 2,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      }
+    ],
+    [
+      {
+        "cable1": 0,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 0,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 0,
+        "cable2": 1,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 2,
+        "cable2": 3,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      },
+      {
+        "cable1": 1,
+        "cable2": 2,
+        "upper_logic": "OR",
+        "lower_logic": "AND"
+      }
+    ]
+  ]
+}
